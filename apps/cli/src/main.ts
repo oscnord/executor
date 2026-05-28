@@ -68,7 +68,6 @@ import {
   type ExecutorLocalServerManifest,
   type ExecutorServerConnection,
   type ExecutorServerConnectionInput,
-  type ExecutorServerConnectionKind,
 } from "@executor-js/sdk/shared";
 import { startServer, runMcpStdioServer, getExecutor } from "@executor-js/local";
 import { makeQuickJsExecutor } from "@executor-js/runtime-quickjs";
@@ -1855,20 +1854,15 @@ const toolsCommand = Command.make("tools").pipe(
   Command.withDescription("Discover available tools and sources"),
 );
 
-const inferStoredServerConnectionKind = (origin: string): ExecutorServerConnectionKind => {
-  const normalized = normalizeExecutorServerConnection({ origin });
-  return new URL(normalized.origin).protocol === "https:" ? "cloud" : "http";
-};
-
 const profileConnectionInput = (input: {
   readonly origin: string;
   readonly displayName: Option.Option<string>;
-  readonly kind: Option.Option<"http" | "desktop-sidecar" | "cloud">;
+  readonly kind: Option.Option<"http" | "desktop-sidecar">;
 }): ExecutorServerConnectionInput => {
   const selectedKind = Option.getOrUndefined(input.kind);
   const displayName = Option.getOrUndefined(input.displayName);
   return {
-    kind: selectedKind ?? inferStoredServerConnectionKind(input.origin),
+    kind: selectedKind ?? "http",
     origin: input.origin,
     ...(displayName ? { displayName } : {}),
   };
@@ -1910,9 +1904,9 @@ const serverAddCommand = Command.make(
       Options.optional,
       Options.withDescription("Display label for this server profile."),
     ),
-    kind: Options.choice("kind", ["http", "desktop-sidecar", "cloud"] as const).pipe(
+    kind: Options.choice("kind", ["http", "desktop-sidecar"] as const).pipe(
       Options.optional,
-      Options.withDescription("Server kind. Defaults to cloud for HTTPS and http otherwise."),
+      Options.withDescription("Server kind. Defaults to http."),
     ),
     makeDefault: Options.boolean("default").pipe(
       Options.withDefault(false),

@@ -13,7 +13,6 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import type { FrontendErrorReporter } from "@executor-js/react/api/error-reporting";
 import { ExecutorProvider } from "@executor-js/react/api/provider";
-import type { ExecutorServerConnectionInput } from "@executor-js/react/api/server-connection";
 import { Skeleton } from "@executor-js/react/components/skeleton";
 import { Toaster } from "@executor-js/react/components/sonner";
 import { ExecutorPluginsProvider } from "@executor-js/sdk/client";
@@ -213,18 +212,6 @@ function AuthGate() {
 
   const needsOrgRedirect =
     auth.status === "authenticated" && auth.organization == null && !isOnboardingRoute;
-  const cloudConnection = React.useMemo<ExecutorServerConnectionInput | undefined>(
-    () =>
-      typeof window === "undefined"
-        ? undefined
-        : {
-            kind: "cloud",
-            key: "cloud",
-            origin: window.location.origin,
-            displayName: "Executor Cloud",
-          },
-    [],
-  );
 
   React.useEffect(() => {
     if (needsOrgRedirect) {
@@ -251,11 +238,7 @@ function AuthGate() {
   return (
     <AutumnProvider pathPrefix="/api/autumn">
       <Sentry.ErrorBoundary fallback={<ShellErrorFallback />} showDialog={false}>
-        <ExecutorProvider
-          connection={cloudConnection}
-          fallback={<ShellSkeleton />}
-          onHandledError={captureFrontendError}
-        >
+        <ExecutorProvider fallback={<ShellSkeleton />} onHandledError={captureFrontendError}>
           <ExecutorPluginsProvider plugins={clientPlugins}>
             <Shell />
             <Toaster />

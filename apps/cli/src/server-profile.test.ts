@@ -32,9 +32,8 @@ describe("CLI server connection profiles", () => {
 
       try {
         yield* upsertCliServerConnectionProfile({
-          name: "cloud",
+          name: "remote",
           connection: {
-            kind: "cloud",
             origin: "https://executor.example/api",
             auth: { kind: "bearer", token: "key_123" },
           },
@@ -42,15 +41,16 @@ describe("CLI server connection profiles", () => {
         });
 
         const store = yield* readCliServerConnectionStore();
-        expect(store.defaultProfile).toBe("cloud");
+        expect(store.defaultProfile).toBe("remote");
         expect(store.profiles).toHaveLength(1);
+        expect(store.profiles[0]?.connection.kind).toBe("http");
         expect(store.profiles[0]?.connection.origin).toBe("https://executor.example");
         expect(store.profiles[0]?.connection.apiBaseUrl).toBe("https://executor.example/api");
         expect(store.profiles[0]?.connection.auth).toEqual({
           kind: "bearer",
           token: "key_123",
         });
-        expect(defaultCliServerConnectionProfile(store)?.name).toBe("cloud");
+        expect(defaultCliServerConnectionProfile(store)?.name).toBe("remote");
       } finally {
         rmSync(dataDir, { recursive: true, force: true });
       }
@@ -68,15 +68,15 @@ describe("CLI server connection profiles", () => {
           makeDefault: true,
         });
         yield* upsertCliServerConnectionProfile({
-          name: "cloud",
-          connection: { kind: "cloud", origin: "https://executor.example" },
+          name: "remote",
+          connection: { origin: "https://executor.example" },
           makeDefault: false,
         });
 
-        const switched = yield* setDefaultCliServerConnectionProfile("cloud");
-        expect(switched.defaultProfile).toBe("cloud");
+        const switched = yield* setDefaultCliServerConnectionProfile("remote");
+        expect(switched.defaultProfile).toBe("remote");
 
-        const removed = yield* removeCliServerConnectionProfile("cloud");
+        const removed = yield* removeCliServerConnectionProfile("remote");
         expect(removed.defaultProfile).toBeNull();
         expect(removed.profiles.map((profile) => profile.name)).toEqual(["local"]);
       } finally {

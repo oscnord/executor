@@ -32,7 +32,7 @@ const PersistedBearerAuth = Schema.Struct({
 const PersistedAuth = Schema.Union([PersistedBasicAuth, PersistedBearerAuth]);
 
 const PersistedConnection = Schema.Struct({
-  kind: Schema.optional(Schema.Literals(["http", "desktop-sidecar", "cloud"])),
+  kind: Schema.optional(Schema.Literals(["http", "desktop-sidecar"])),
   key: Schema.optional(Schema.String),
   origin: Schema.optional(Schema.String),
   apiBaseUrl: Schema.optional(Schema.String),

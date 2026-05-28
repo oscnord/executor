@@ -6,13 +6,12 @@ Accepted
 
 ## Context
 
-Executor had three product entry points that all treated "where the server is" differently:
+Executor had local product entry points that treated "where the server is" differently:
 
 - The CLI defaulted to a local daemon and assumed `--base-url` was part of daemon management.
 - The desktop app started a sidecar server, but the renderer mostly inferred that server from `window.location` and Electron header injection.
-- The cloud app mixed hosted product concerns with the reusable app surface, using its own API client setup and onboarding MCP URLs.
 
-That made the product relationship shallow: CLI, desktop, app, and cloud each had to know local details about URL construction, auth, and server ownership.
+That made the product relationship shallow: CLI, desktop, and the app each had to know local details about URL construction, auth, and server ownership.
 
 OpenCode's model is cleaner for this product shape: the server is the durable product concept, and CLI/web/desktop are adapters over server connections.
 
@@ -22,7 +21,7 @@ Executor will use **Executor Server** as the core product concept and **Executor
 
 An Executor Server Connection includes:
 
-- `kind`: local HTTP, desktop sidecar, or cloud/hosted server.
+- `kind`: generic HTTP server or desktop sidecar.
 - `key`: stable identity for selection and caching.
 - `origin`: the web/MCP origin.
 - `apiBaseUrl`: the typed API base URL.
@@ -31,9 +30,8 @@ An Executor Server Connection includes:
 
 The shared contract lives in `@executor-js/sdk/shared`. UI-specific behavior, such as reading an Electron preload bridge, lives in `@executor-js/react`. Product entry points adapt into this contract:
 
-- CLI resolves named `--server` profiles or explicit `--base-url` values into an Executor Server Connection. Local HTTP URLs may auto-start a daemon; hosted URLs are treated as explicit remote servers and can use `EXECUTOR_API_KEY`.
+- CLI resolves named `--server` profiles or explicit `--base-url` values into an Executor Server Connection. Local HTTP URLs may auto-start a daemon; remote HTTP(S) URLs are treated as explicit servers and can use environment auth.
 - Desktop exposes its sidecar as an Executor Server Connection through preload IPC; desktop-only settings mutate and restart that connection inside the Electron adapter.
-- Cloud identifies its authenticated app connection as a cloud Executor Server Connection, while hosted console routes such as organization, billing, and API keys remain visibly cloud-product concerns.
 - The reusable app consumes the active connection through `ExecutorProvider`, and app-side profile selection updates that connection rather than inventing a second URL setting.
 - First-party plugin clients must resolve API URL and Authorization from the active Executor Server Connection, not from a standalone `baseUrl` helper.
 - Local CLI/desktop servers publish a single active owner manifest in the data directory. Implicit CLI commands attach to that owner; explicit local daemon starts are refused while another owner is alive.
@@ -44,7 +42,7 @@ New surfaces should not add one-off `baseUrl` globals or infer server identity d
 
 Local daemon management remains a CLI adapter concern, not the universal meaning of a server URL.
 
-Cloud org/billing/auth remains a hosted product concern, but the app's core tools/sources/secrets/policies workflow talks to an Executor Server through the same connection contract as local and desktop.
+Hosted product concerns remain out of scope for this decision. The app's core tools/sources/secrets/policies workflow talks to an Executor Server through the same local/desktop/custom HTTP connection contract.
 
 Persisted server profiles and selection must stay on top of this contract, not become another URL abstraction.
 

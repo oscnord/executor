@@ -3,7 +3,7 @@ import { Option, Schema } from "effect";
 export const DEFAULT_EXECUTOR_SERVER_ORIGIN = "http://127.0.0.1:4000";
 export const DEFAULT_EXECUTOR_SERVER_USERNAME = "executor";
 
-export type ExecutorServerConnectionKind = "http" | "desktop-sidecar" | "cloud";
+export type ExecutorServerConnectionKind = "http" | "desktop-sidecar";
 export type ExecutorLocalServerKind = "cli-daemon" | "desktop-sidecar" | "foreground";
 
 export type ExecutorServerAuth =
@@ -144,7 +144,7 @@ const ExecutorServerAuthJson = Schema.Union([
 ]);
 
 const ExecutorServerConnectionJson = Schema.Struct({
-  kind: Schema.optional(Schema.Literals(["http", "desktop-sidecar", "cloud"])),
+  kind: Schema.optional(Schema.Literals(["http", "desktop-sidecar"])),
   key: Schema.optional(Schema.String),
   origin: Schema.String,
   apiBaseUrl: Schema.optional(Schema.String),

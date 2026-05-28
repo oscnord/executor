@@ -22,17 +22,16 @@ describe("Executor server connection", () => {
 
   it("builds a stable connection from an explicit server origin", () => {
     const connection = normalizeExecutorServerConnection({
-      kind: "cloud",
       origin: "https://executor.example",
-      displayName: "Executor Cloud",
+      displayName: "Remote Executor",
     });
 
     expect(connection).toMatchObject({
-      kind: "cloud",
-      key: "cloud:https://executor.example",
+      kind: "http",
+      key: "http:https://executor.example",
       origin: "https://executor.example",
       apiBaseUrl: "https://executor.example/api",
-      displayName: "Executor Cloud",
+      displayName: "Remote Executor",
     });
   });
 
@@ -56,11 +55,11 @@ describe("Executor server connection", () => {
           origin: "https://executor.example",
           auth: {
             kind: "bearer",
-            token: "cloud-token",
+            token: "remote-token",
           },
         }),
       ),
-    ).toBe("Bearer cloud-token");
+    ).toBe("Bearer remote-token");
   });
 
   it("round-trips local server owner manifests", () => {

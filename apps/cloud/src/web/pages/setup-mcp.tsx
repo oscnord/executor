@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@executor-js/react/components/button";
-import {
-  normalizeExecutorServerConnection,
-  type ExecutorServerConnection,
-} from "@executor-js/react/api/server-connection";
 import { CodeBlock } from "@executor-js/react/components/code-block";
 import {
   buildMcpHttpEndpoint,
@@ -21,33 +17,26 @@ import { NativeSelect, NativeSelectOption } from "@executor-js/react/components/
 
 export const SetupMcpPage = () => {
   const navigate = useNavigate();
-  const [serverConnection, setServerConnection] = useState<ExecutorServerConnection | null>(null);
+  const [origin, setOrigin] = useState<string | null>(null);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [elicitationMode, setElicitationMode] = useState<McpElicitationMode>("model");
 
   useEffect(() => {
-    setServerConnection(
-      normalizeExecutorServerConnection({
-        kind: "cloud",
-        key: "cloud",
-        origin: window.location.origin,
-        displayName: "Executor Cloud",
-      }),
-    );
+    setOrigin(window.location.origin);
   }, []);
 
-  const endpoint = serverConnection
+  const endpoint = origin
     ? buildMcpHttpEndpoint({
-        origin: serverConnection.origin,
+        origin,
         desktop: null,
         elicitationMode,
       })
     : "";
-  const command = serverConnection
+  const command = origin
     ? buildMcpInstallCommand({
         mode: "http",
         isDev: false,
-        origin: serverConnection.origin,
+        origin,
         elicitationMode,
       })
     : "";

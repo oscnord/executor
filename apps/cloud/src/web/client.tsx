@@ -1,10 +1,7 @@
 import * as AtomHttpApi from "effect/unstable/reactivity/AtomHttpApi";
-import { FetchHttpClient, HttpClient, HttpClientRequest } from "effect/unstable/http";
+import { FetchHttpClient } from "effect/unstable/http";
 import { addGroup } from "@executor-js/api";
-import {
-  getExecutorApiBaseUrl,
-  getExecutorServerAuthorizationHeader,
-} from "@executor-js/react/api/server-connection";
+import { getBaseUrl } from "@executor-js/react/api/base-url";
 import { CloudAuthApi } from "../auth/api";
 import { OrgApi } from "../org/api";
 
@@ -16,14 +13,7 @@ const CloudApi = addGroup(CloudAuthApi).add(OrgApi);
 const CloudApiClient = AtomHttpApi.Service<"CloudApiClient">()("CloudApiClient", {
   api: CloudApi,
   httpClient: FetchHttpClient.layer,
-  transformClient: HttpClient.mapRequest((request) => {
-    let next = HttpClientRequest.prependUrl(request, getExecutorApiBaseUrl());
-    const authorization = getExecutorServerAuthorizationHeader();
-    if (authorization) {
-      next = HttpClientRequest.setHeader(next, "authorization", authorization);
-    }
-    return next;
-  }),
+  baseUrl: getBaseUrl(),
 });
 
 export { CloudApiClient };

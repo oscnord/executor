@@ -8,7 +8,6 @@ import {
   type ExecutorServerAuth,
   type ExecutorServerConnection,
   type ExecutorServerConnectionInput,
-  type ExecutorServerConnectionKind,
 } from "@executor-js/sdk/shared";
 
 export interface CliServerConnectionProfile {
@@ -64,9 +63,7 @@ const decodeConnection = (value: unknown): ExecutorServerConnection | null => {
   if (typeof value !== "object" || value === null) return null;
   const record = value as Record<string, unknown>;
   const kind =
-    record.kind === "http" || record.kind === "desktop-sidecar" || record.kind === "cloud"
-      ? (record.kind as ExecutorServerConnectionKind)
-      : undefined;
+    record.kind === "http" || record.kind === "desktop-sidecar" ? record.kind : undefined;
   const input: ExecutorServerConnectionInput = {
     ...(kind ? { kind } : {}),
     ...(typeof record.key === "string" ? { key: record.key } : {}),

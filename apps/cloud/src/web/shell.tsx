@@ -71,14 +71,6 @@ function NavItem(props: { to: string; label: string; active: boolean; onNavigate
   );
 }
 
-function NavGroupLabel(props: { children: React.ReactNode }) {
-  return (
-    <div className="mt-4 mb-1 px-2.5 text-xs font-medium uppercase tracking-widest text-muted-foreground first:mt-0">
-      {props.children}
-    </div>
-  );
-}
-
 // ── SourceList ───────────────────────────────────────────────────────────
 
 function SourceList(props: { pathname: string; onNavigate?: () => void }) {
@@ -432,7 +424,6 @@ function SidebarContent(props: { pathname: string; onNavigate?: () => void; show
   const isPolicies = props.pathname === "/policies";
   const isBilling = props.pathname === "/billing" || props.pathname.startsWith("/billing/");
   const isOrg = props.pathname === "/org";
-  const isApiKeys = props.pathname === "/api-keys";
 
   return (
     <>
@@ -443,7 +434,6 @@ function SidebarContent(props: { pathname: string; onNavigate?: () => void; show
       )}
 
       <nav className="flex flex-1 flex-col overflow-y-auto p-2">
-        <NavGroupLabel>Executor app</NavGroupLabel>
         <NavItem to="/" label="Sources" active={isHome} onNavigate={props.onNavigate} />
         <NavItem
           to="/connections"
@@ -458,13 +448,12 @@ function SidebarContent(props: { pathname: string; onNavigate?: () => void; show
           active={isPolicies}
           onNavigate={props.onNavigate}
         />
-
-        <NavGroupLabel>Cloud console</NavGroupLabel>
         <NavItem to="/org" label="Organization" active={isOrg} onNavigate={props.onNavigate} />
         <NavItem to="/billing" label="Billing" active={isBilling} onNavigate={props.onNavigate} />
-        <NavItem to="/api-keys" label="API keys" active={isApiKeys} onNavigate={props.onNavigate} />
 
-        <NavGroupLabel>Connected sources</NavGroupLabel>
+        <div className="mt-5 mb-1 px-2.5 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+          <span>Sources</span>
+        </div>
 
         <SourceList pathname={props.pathname} onNavigate={props.onNavigate} />
       </nav>

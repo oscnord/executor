@@ -39,7 +39,7 @@ const readCliServerAuthForConnection = (
   const basic = readCliBasicServerAuth(env);
   const protocol = new URL(connection.origin).protocol;
 
-  if (connection.kind === "cloud" || protocol === "https:") {
+  if (protocol === "https:") {
     return bearer ?? basic;
   }
 
