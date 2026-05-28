@@ -25,6 +25,8 @@ export {
 interface ExecutorWindowBridge {
   readonly serverConnection?: ExecutorServerConnectionInput;
   readonly getServerConnection?: () => Promise<ExecutorServerConnectionInput | null>;
+  readonly getServerProfiles?: () => Promise<string | null>;
+  readonly setServerProfiles?: (value: string) => Promise<void>;
   readonly baseUrl?: string;
   readonly authPassword?: string;
 }

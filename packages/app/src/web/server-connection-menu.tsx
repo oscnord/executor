@@ -8,10 +8,14 @@ import {
   type ExecutorServerConnectionInput,
 } from "@executor-js/react/api/server-connection";
 import {
+  EXECUTOR_SERVER_PROFILES_STORAGE_KEY,
   getActiveExecutorServerProfile,
+  normalizeExecutorServerProfilesSnapshot,
+  parseExecutorServerProfilesSnapshot,
   readExecutorServerProfiles,
   removeExecutorServerProfile,
   selectExecutorServerProfile,
+  serializeExecutorServerProfilesSnapshot,
   upsertExecutorServerProfile,
   writeExecutorServerProfiles,
   type ExecutorServerProfilesSnapshot,
@@ -47,7 +51,82 @@ const emptyDraft: DraftProfile = {
   secret: "",
 };
 
-const storage = () => (typeof window === "undefined" ? null : window.localStorage);
+interface DesktopProfileStorageBridge {
+  readonly getServerProfiles: () => Promise<string | null>;
+  readonly setServerProfiles: (value: string) => Promise<void>;
+}
+
+const browserStorage = () => (typeof window === "undefined" ? null : window.localStorage);
+
+const desktopProfileStorageBridge = (): DesktopProfileStorageBridge | null => {
+  if (typeof window === "undefined") return null;
+  const bridge = window.executor;
+  if (
+    !bridge ||
+    typeof bridge.getServerProfiles !== "function" ||
+    typeof bridge.setServerProfiles !== "function"
+  ) {
+    return null;
+  }
+  return {
+    getServerProfiles: bridge.getServerProfiles,
+    setServerProfiles: bridge.setServerProfiles,
+  };
+};
+
+const readBrowserProfiles = (): ExecutorServerProfilesSnapshot =>
+  readExecutorServerProfiles(browserStorage());
+
+const clearBrowserProfiles = (): void => {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(EXECUTOR_SERVER_PROFILES_STORAGE_KEY);
+};
+
+const readStoredProfiles = (): Promise<ExecutorServerProfilesSnapshot> => {
+  const bridge = desktopProfileStorageBridge();
+  const browserProfiles = readBrowserProfiles();
+  if (!bridge) return Promise.resolve(browserProfiles);
+
+  return bridge.getServerProfiles().then(
+    (raw) => {
+      const desktopProfiles = parseExecutorServerProfilesSnapshot(raw);
+      if (desktopProfiles.profiles.length > 0) {
+        if (browserProfiles.profiles.length > 0) {
+          const mergedProfiles = normalizeExecutorServerProfilesSnapshot({
+            activeKey: desktopProfiles.activeKey ?? browserProfiles.activeKey,
+            profiles: [...browserProfiles.profiles, ...desktopProfiles.profiles],
+          });
+          void bridge
+            .setServerProfiles(serializeExecutorServerProfilesSnapshot(mergedProfiles))
+            .then(clearBrowserProfiles, () => undefined);
+          return mergedProfiles;
+        }
+        clearBrowserProfiles();
+        return desktopProfiles;
+      }
+      if (browserProfiles.profiles.length > 0) {
+        void bridge
+          .setServerProfiles(serializeExecutorServerProfilesSnapshot(browserProfiles))
+          .then(clearBrowserProfiles, () => undefined);
+        return browserProfiles;
+      }
+      return desktopProfiles;
+    },
+    () => browserProfiles,
+  );
+};
+
+const writeStoredProfiles = (snapshot: ExecutorServerProfilesSnapshot): void => {
+  const bridge = desktopProfileStorageBridge();
+  if (!bridge) {
+    writeExecutorServerProfiles(browserStorage(), snapshot);
+    return;
+  }
+
+  void bridge
+    .setServerProfiles(serializeExecutorServerProfilesSnapshot(snapshot))
+    .then(clearBrowserProfiles, () => undefined);
+};
 
 const serverLabel = (connection: ExecutorServerConnection): string =>
   connection.displayName || connection.origin.replace(/^https?:\/\//, "");
@@ -108,28 +187,35 @@ export function ServerConnectionMenu() {
 
   const persistSnapshot = useCallback((next: ExecutorServerProfilesSnapshot) => {
     setSnapshot(next);
-    writeExecutorServerProfiles(storage(), next);
+    writeStoredProfiles(next);
   }, []);
 
   useEffect(() => {
     if (hydratedRef.current) return;
     hydratedRef.current = true;
 
-    const stored = readExecutorServerProfiles(storage());
-    const storedActive = getActiveExecutorServerProfile(stored);
-    const next = snapshotWithCurrent(stored, connection, storedActive === null);
-    persistSnapshot(next);
-    if (storedActive && storedActive.key !== connection.key) {
-      setServerConnection(storedActive);
-    }
-    setHydrated(true);
+    let cancelled = false;
+    void readStoredProfiles().then((stored) => {
+      if (cancelled) return;
+      const storedActive = getActiveExecutorServerProfile(stored);
+      const next = snapshotWithCurrent(stored, connection, storedActive === null);
+      persistSnapshot(next);
+      if (storedActive && storedActive.key !== connection.key) {
+        setServerConnection(storedActive);
+      }
+      setHydrated(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [connection, persistSnapshot, setServerConnection]);
 
   useEffect(() => {
     if (!hydrated) return;
     setSnapshot((previous) => {
       const next = snapshotWithCurrent(previous, connection, true);
-      writeExecutorServerProfiles(storage(), next);
+      writeStoredProfiles(next);
       return next;
     });
   }, [connection, hydrated]);

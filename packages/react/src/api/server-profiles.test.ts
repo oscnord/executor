@@ -2,9 +2,11 @@ import { describe, expect, it } from "@effect/vitest";
 
 import {
   getActiveExecutorServerProfile,
+  parseExecutorServerProfilesSnapshot,
   readExecutorServerProfiles,
   removeExecutorServerProfile,
   selectExecutorServerProfile,
+  serializeExecutorServerProfilesSnapshot,
   upsertExecutorServerProfile,
   writeExecutorServerProfiles,
   type ExecutorServerProfileStorage,
@@ -73,9 +75,17 @@ describe("Executor server profiles", () => {
     expect(getActiveExecutorServerProfile(selected)?.displayName).toBe("Local");
 
     writeExecutorServerProfiles(storage, selected, "profiles");
+    expect(storage.values.get("profiles")).toContain("token_123");
+
     const roundTripped = readExecutorServerProfiles(storage, "profiles");
     expect(roundTripped.profiles).toHaveLength(2);
     expect(roundTripped.profiles[1]?.auth).toEqual({ kind: "bearer", token: "token_123" });
+
+    const serialized = serializeExecutorServerProfilesSnapshot(roundTripped);
+    expect(parseExecutorServerProfilesSnapshot(serialized).profiles[1]?.auth).toEqual({
+      kind: "bearer",
+      token: "token_123",
+    });
 
     const removed = removeExecutorServerProfile(roundTripped, "http:http://127.0.0.1:4788");
     expect(removed.activeKey).toBe("http:https://executor.example");

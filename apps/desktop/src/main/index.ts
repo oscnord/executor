@@ -23,7 +23,13 @@ import {
   SidecarPortInUseError,
   type SidecarConnection,
 } from "./sidecar";
-import { getServerSettings, regeneratePassword, updateServerSettings } from "./settings";
+import {
+  getServerProfiles,
+  getServerSettings,
+  regeneratePassword,
+  setServerProfiles,
+  updateServerSettings,
+} from "./settings";
 import {
   SERVER_SETTINGS_USERNAME,
   type DesktopServerConnection,
@@ -266,6 +272,11 @@ const registerIpcHandlers = () => {
     "executor:settings:regenerate-password",
     (): DesktopServerSettings => regeneratePassword(),
   );
+  ipcMain.handle("executor:server-profiles:get", (): string | null => getServerProfiles());
+  ipcMain.handle("executor:server-profiles:set", (_evt, value: unknown): void => {
+    if (typeof value !== "string") return;
+    setServerProfiles(value);
+  });
   ipcMain.handle("executor:server:restart", () => restartSidecarAndReload());
   ipcMain.handle("executor:shell:open-external", async (_evt, rawUrl: unknown) => {
     if (typeof rawUrl !== "string") return;

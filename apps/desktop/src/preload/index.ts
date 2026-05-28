@@ -6,6 +6,14 @@ const api = {
   getServerConnection(): Promise<DesktopServerConnection | null> {
     return ipcRenderer.invoke("executor:server:connection");
   },
+  /** Read the desktop-persisted server profile payload. */
+  getServerProfiles(): Promise<string | null> {
+    return ipcRenderer.invoke("executor:server-profiles:get");
+  },
+  /** Persist the server profile payload in desktop storage. */
+  setServerProfiles(value: string): Promise<void> {
+    return ipcRenderer.invoke("executor:server-profiles:set", value);
+  },
   /** Read the persisted server settings (port, requireAuth, password). */
   getSettings(): Promise<DesktopServerSettings> {
     return ipcRenderer.invoke("executor:settings:get");

@@ -88,6 +88,30 @@ const asConnectionInput = (connection: ExecutorServerConnection): PersistedConne
   ...(connection.auth ? { auth: connection.auth as ExecutorServerAuth } : {}),
 });
 
+export const parseExecutorServerProfilesSnapshot = (
+  raw: string | null | undefined,
+): ExecutorServerProfilesSnapshot => {
+  if (!raw) return EMPTY_PROFILES;
+  const decoded = decodeProfilesJson(raw);
+  if (Option.isNone(decoded)) return EMPTY_PROFILES;
+  return normalizeExecutorServerProfilesSnapshot(decoded.value);
+};
+
+export const serializeExecutorServerProfilesSnapshot = (
+  snapshot: ExecutorServerProfilesSnapshot,
+): string => {
+  // Custom server auth is intentionally persisted with the profile so local-dev
+  // and advanced remote endpoints do not force reauth on every reload. Desktop
+  // stores this payload through its Electron store; web falls back to
+  // localStorage for the same format.
+  const persisted: PersistedProfiles = {
+    version: 1,
+    activeKey: snapshot.activeKey,
+    profiles: snapshot.profiles.map(asConnectionInput),
+  };
+  return JSON.stringify(persisted);
+};
+
 export const normalizeExecutorServerProfilesSnapshot = (input: {
   readonly activeKey?: string | null;
   readonly profiles?: readonly ExecutorServerConnectionInput[];
@@ -111,11 +135,7 @@ export const readExecutorServerProfiles = (
   storageKey = EXECUTOR_SERVER_PROFILES_STORAGE_KEY,
 ): ExecutorServerProfilesSnapshot => {
   if (!storage) return EMPTY_PROFILES;
-  const raw = storage.getItem(storageKey);
-  if (!raw) return EMPTY_PROFILES;
-  const decoded = decodeProfilesJson(raw);
-  if (Option.isNone(decoded)) return EMPTY_PROFILES;
-  return normalizeExecutorServerProfilesSnapshot(decoded.value);
+  return parseExecutorServerProfilesSnapshot(storage.getItem(storageKey));
 };
 
 export const writeExecutorServerProfiles = (
@@ -124,12 +144,7 @@ export const writeExecutorServerProfiles = (
   storageKey = EXECUTOR_SERVER_PROFILES_STORAGE_KEY,
 ): void => {
   if (!storage) return;
-  const persisted: PersistedProfiles = {
-    version: 1,
-    activeKey: snapshot.activeKey,
-    profiles: snapshot.profiles.map(asConnectionInput),
-  };
-  storage.setItem(storageKey, JSON.stringify(persisted));
+  storage.setItem(storageKey, serializeExecutorServerProfilesSnapshot(snapshot));
 };
 
 export const getActiveExecutorServerProfile = (
