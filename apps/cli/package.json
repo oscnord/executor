@@ -18,6 +18,7 @@
     "build:publish": "bun run src/build.ts publish",
     "release:publish:dry-run": "bun run src/release.ts --dry-run",
     "release:publish": "bun run src/release.ts",
+    "test": "bun --bun vitest run",
     "typecheck": "tsgo --noEmit",
     "typecheck:slow": "tsc --noEmit"
   },
@@ -33,7 +34,9 @@
     "quickjs-emscripten": "catalog:"
   },
   "devDependencies": {
+    "@effect/vitest": "catalog:",
     "bun-types": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

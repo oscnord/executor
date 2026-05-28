@@ -45,8 +45,10 @@
         "quickjs-emscripten": "catalog:",
       },
       "devDependencies": {
+        "@effect/vitest": "catalog:",
         "bun-types": "catalog:",
         "typescript": "catalog:",
+        "vitest": "catalog:",
       },
     },
     "apps/cloud": {
