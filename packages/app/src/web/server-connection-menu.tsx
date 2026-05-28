@@ -172,7 +172,12 @@ const draftAuth = (draft: DraftProfile): ExecutorServerAuth | undefined => {
   return undefined;
 };
 
-export function ServerConnectionMenu() {
+interface ServerConnectionMenuProps {
+  readonly side?: "top" | "right" | "bottom" | "left";
+  readonly align?: "start" | "center" | "end";
+}
+
+export function ServerConnectionMenu(props: ServerConnectionMenuProps = {}) {
   const connection = useExecutorServerConnection();
   const setServerConnection = useSetExecutorServerConnection();
   const hydratedRef = useRef(false);
@@ -274,23 +279,44 @@ export function ServerConnectionMenu() {
         <Button
           type="button"
           variant="ghost"
-          className="h-auto w-full justify-start rounded-md px-2.5 py-2 text-left hover:bg-sidebar-active"
+          aria-label="Select Executor server"
+          className="group h-auto min-h-12 w-full justify-start rounded-md border border-sidebar-border/70 bg-sidebar-active/35 px-2.5 py-2 text-left hover:border-sidebar-border hover:bg-sidebar-active"
         >
-          <span className="flex min-w-0 flex-1 flex-col gap-1">
-            <span className="text-xs font-medium text-muted-foreground">Server</span>
-            <span className="truncate text-sm font-medium text-foreground">
-              {serverLabel(connection)}
+          <span className="mt-1 size-2 shrink-0 rounded-full bg-primary/80 shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]" />
+          <span className="ml-2.5 flex min-w-0 flex-1 flex-col gap-0.5">
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate text-sm font-medium leading-5 text-foreground">
+                {serverLabel(connection)}
+              </span>
+              <span className="shrink-0 rounded border border-border/70 px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
+                {serverKindLabel(connection)}
+              </span>
             </span>
-            <span className="truncate text-xs font-normal text-muted-foreground">
+            <span className="truncate text-xs font-normal leading-4 text-muted-foreground">
               {serverDescription(connection)}
             </span>
           </span>
-          <span className="rounded border border-border/70 px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
-            {authLabel(connection)}
-          </span>
+          <svg
+            viewBox="0 0 16 16"
+            fill="none"
+            className="ml-2 size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+            aria-hidden="true"
+          >
+            <path
+              d="M4.5 6.5 8 10l3.5-3.5"
+              stroke="currentColor"
+              strokeWidth="1.4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </Button>
       </PopoverTrigger>
-      <PopoverContent side="top" align="start" className="w-80 p-0">
+      <PopoverContent
+        side={props.side ?? "right"}
+        align={props.align ?? "start"}
+        className="w-80 p-0"
+      >
         <PopoverHeader className="border-b border-border px-4 py-3">
           <PopoverTitle>Server profiles</PopoverTitle>
         </PopoverHeader>
@@ -298,6 +324,7 @@ export function ServerConnectionMenu() {
         <div className="max-h-56 overflow-y-auto p-2">
           {snapshot.profiles.map((profile) => {
             const active = profile.key === connection.key;
+            const profileAuthLabel = authLabel(profile);
             return (
               <div
                 key={profile.key}
@@ -324,6 +351,11 @@ export function ServerConnectionMenu() {
                 <span className="rounded border border-border/70 px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
                   {serverKindLabel(profile)}
                 </span>
+                {profileAuthLabel !== "No auth" && (
+                  <span className="rounded border border-border/70 px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+                    {profileAuthLabel}
+                  </span>
+                )}
                 <Button
                   type="button"
                   variant="ghost"

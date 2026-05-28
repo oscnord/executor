@@ -32,7 +32,7 @@ function ShellConnectionError() {
         <div className="flex h-12 shrink-0 items-center border-b border-sidebar-border px-4">
           <span className="font-display text-base tracking-tight text-foreground">executor</span>
         </div>
-        <div className="mt-auto border-t border-sidebar-border px-4 py-2.5">
+        <div className="shrink-0 border-b border-sidebar-border px-3 py-2.5">
           <ServerConnectionMenu />
         </div>
       </aside>
@@ -40,7 +40,7 @@ function ShellConnectionError() {
       <main className="flex min-h-screen flex-1 items-center justify-center px-5 py-8">
         <div className="w-full max-w-md">
           <div className="mb-5 md:hidden">
-            <ServerConnectionMenu />
+            <ServerConnectionMenu side="bottom" />
           </div>
           <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
             Server unavailable
