@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ChevronDownIcon, ServerIcon } from "lucide-react";
+import { ServerIcon } from "lucide-react";
 import {
   getExecutorServerAuthorizationHeader,
   useExecutorServerConnection,
@@ -279,15 +279,12 @@ export function ServerConnectionMenu(props: ServerConnectionMenuProps = {}) {
       <Button
         type="button"
         variant="ghost"
+        size="icon-xs"
         aria-label={`Select Executor server: ${serverLabel(connection)}`}
         title={`${serverLabel(connection)} (${serverDescription(connection)})`}
-        className="group h-7 w-full min-w-0 max-w-24 justify-start gap-1.5 overflow-hidden rounded-md px-1.5 text-left text-muted-foreground hover:bg-sidebar-active hover:text-foreground"
+        className="size-7 rounded-md text-muted-foreground hover:bg-sidebar-active hover:text-foreground"
       >
-        <ServerIcon className="size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
-        <span className="min-w-0 flex-1 truncate text-xs font-medium leading-none">
-          {connection.kind === "desktop-sidecar" ? "Desktop" : serverLabel(connection)}
-        </span>
-        <ChevronDownIcon className="size-3 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+        <ServerIcon className="size-3.5" />
       </Button>
     ) : (
       <Button
