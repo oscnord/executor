@@ -175,6 +175,7 @@ const draftAuth = (draft: DraftProfile): ExecutorServerAuth | undefined => {
 interface ServerConnectionMenuProps {
   readonly side?: "top" | "right" | "bottom" | "left";
   readonly align?: "start" | "center" | "end";
+  readonly variant?: "default" | "header";
 }
 
 export function ServerConnectionMenu(props: ServerConnectionMenuProps = {}) {
@@ -272,46 +273,75 @@ export function ServerConnectionMenu(props: ServerConnectionMenuProps = {}) {
     persistSnapshot(next);
     setServerConnection(active);
   };
+  const trigger =
+    props.variant === "header" ? (
+      <Button
+        type="button"
+        variant="ghost"
+        aria-label={`Select Executor server: ${serverLabel(connection)}`}
+        title={`${serverLabel(connection)} (${serverDescription(connection)})`}
+        className="group h-7 w-full min-w-0 max-w-24 justify-start gap-1.5 overflow-hidden rounded-md px-1.5 text-left text-muted-foreground hover:bg-sidebar-active hover:text-foreground"
+      >
+        <span className="size-1.5 shrink-0 rounded-full bg-primary/80" />
+        <span className="min-w-0 flex-1 truncate text-xs font-medium leading-none">
+          {connection.kind === "desktop-sidecar" ? "Desktop" : serverLabel(connection)}
+        </span>
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          className="size-3 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+          aria-hidden="true"
+        >
+          <path
+            d="M4.5 6.5 8 10l3.5-3.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </Button>
+    ) : (
+      <Button
+        type="button"
+        variant="ghost"
+        aria-label="Select Executor server"
+        className="group h-auto min-h-10 w-full justify-start rounded-md px-2.5 py-1.5 text-left hover:bg-sidebar-active"
+      >
+        <span className="size-1.5 shrink-0 rounded-full bg-primary/80" />
+        <span className="ml-2 flex min-w-0 flex-1 flex-col gap-0.5">
+          <span className="flex min-w-0 items-center gap-1.5">
+            <span className="truncate text-sm font-medium leading-5 text-foreground">
+              {serverLabel(connection)}
+            </span>
+            <span className="shrink-0 rounded border border-border/70 px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
+              {serverKindLabel(connection)}
+            </span>
+          </span>
+          <span className="truncate text-xs font-normal leading-4 text-muted-foreground">
+            {serverDescription(connection)}
+          </span>
+        </span>
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          className="ml-2 size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
+          aria-hidden="true"
+        >
+          <path
+            d="M4.5 6.5 8 10l3.5-3.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </Button>
+    );
 
   return (
     <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          type="button"
-          variant="ghost"
-          aria-label="Select Executor server"
-          className="group h-auto min-h-12 w-full justify-start rounded-md border border-sidebar-border/70 bg-sidebar-active/35 px-2.5 py-2 text-left hover:border-sidebar-border hover:bg-sidebar-active"
-        >
-          <span className="mt-1 size-2 shrink-0 rounded-full bg-primary/80 shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]" />
-          <span className="ml-2.5 flex min-w-0 flex-1 flex-col gap-0.5">
-            <span className="flex min-w-0 items-center gap-1.5">
-              <span className="truncate text-sm font-medium leading-5 text-foreground">
-                {serverLabel(connection)}
-              </span>
-              <span className="shrink-0 rounded border border-border/70 px-1.5 py-0.5 text-[10px] font-medium leading-none text-muted-foreground">
-                {serverKindLabel(connection)}
-              </span>
-            </span>
-            <span className="truncate text-xs font-normal leading-4 text-muted-foreground">
-              {serverDescription(connection)}
-            </span>
-          </span>
-          <svg
-            viewBox="0 0 16 16"
-            fill="none"
-            className="ml-2 size-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground"
-            aria-hidden="true"
-          >
-            <path
-              d="M4.5 6.5 8 10l3.5-3.5"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </Button>
-      </PopoverTrigger>
+      <PopoverTrigger asChild>{trigger}</PopoverTrigger>
       <PopoverContent
         side={props.side ?? "right"}
         align={props.align ?? "start"}

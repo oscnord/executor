@@ -357,19 +357,18 @@ function SidebarContent(props: {
   return (
     <>
       {props.showBrand !== false && (
-        <div className="flex h-12 shrink-0 items-center border-b border-sidebar-border px-4">
-          <Link to="/" className="flex items-center gap-1.5">
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
+          <Link to="/" className="flex shrink-0 items-center gap-1.5">
             <span className="font-display text-base tracking-tight text-foreground">executor</span>
             <span className="rounded bg-primary/15 px-1.5 py-px text-[10px] font-semibold uppercase tracking-wider text-primary">
               Beta
             </span>
           </Link>
+          <div className="ml-auto flex min-w-0 flex-1 justify-end">
+            <ServerConnectionMenu variant="header" />
+          </div>
         </div>
       )}
-
-      <div className="shrink-0 border-b border-sidebar-border px-3 py-2.5">
-        <ServerConnectionMenu />
-      </div>
 
       <nav className="flex flex-1 flex-col overflow-y-auto p-2">
         <ScopeLabel />

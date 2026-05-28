@@ -29,11 +29,13 @@ function ShellConnectionError() {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
       <aside className="hidden w-56 shrink-0 border-r border-sidebar-border bg-sidebar md:flex md:flex-col">
-        <div className="flex h-12 shrink-0 items-center border-b border-sidebar-border px-4">
-          <span className="font-display text-base tracking-tight text-foreground">executor</span>
-        </div>
-        <div className="shrink-0 border-b border-sidebar-border px-3 py-2.5">
-          <ServerConnectionMenu />
+        <div className="flex h-12 shrink-0 items-center gap-2 border-b border-sidebar-border px-4">
+          <span className="shrink-0 font-display text-base tracking-tight text-foreground">
+            executor
+          </span>
+          <div className="ml-auto flex min-w-0 flex-1 justify-end">
+            <ServerConnectionMenu variant="header" />
+          </div>
         </div>
       </aside>
 
